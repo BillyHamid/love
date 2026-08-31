@@ -1,0 +1,67 @@
+@import "tailwindcss";
+
+@theme {
+  /* Palette : crème, rose doux, une pointe de prune. Rien de flashy. */
+  --color-cream: #fffaf8;
+  --color-blush: #fceef2;
+  --color-rose-soft: #f4b6c6;
+  --color-rose: #d9486b;
+  --color-rose-deep: #b03b5a;
+  --color-plum: #7a5a88;
+  --color-ink: #2c1d25;
+  --color-muted: #806b75;
+  --color-line: #f0dfe4;
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-cormorant), ui-serif, Georgia, serif;
+
+  --radius-card: 1.75rem;
+
+  --shadow-soft: 0 1px 2px rgb(44 29 37 / 0.04), 0 8px 24px -6px rgb(217 72 107 / 0.10);
+  --shadow-lift: 0 2px 4px rgb(44 29 37 / 0.05), 0 20px 48px -12px rgb(217 72 107 / 0.20);
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--color-cream);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    /* Deux halos très légers, fixes, qui donnent la profondeur. */
+    background-image:
+      radial-gradient(60rem 40rem at 15% -10%, #fde7ee 0%, transparent 60%),
+      radial-gradient(45rem 35rem at 100% 105%, #f1e8fa 0%, transparent 60%);
+    background-attachment: fixed;
+    min-height: 100svh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Anneau de focus visible et cohérent, pour la navigation au clavier. */
+  :focus-visible {
+    outline: 2px solid var(--color-rose);
+    outline-offset: 3px;
+    border-radius: 0.75rem;
+  }
+
+  /* Respecte le réglage système « réduire les animations ». */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@utility card-surface {
+  background-color: rgb(255 255 255 / 0.82);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-lift);
+}
