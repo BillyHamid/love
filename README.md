@@ -25,6 +25,31 @@ Tout y est centralisé — texte, emoji, réactions. Rien n'est écrit en dur
 dans les composants : ajouter ou retirer une question suffit, la barre de
 progression et l'écran final s'ajustent seuls.
 
+Une question peut prendre deux formes :
+
+```ts
+// forme normale : 3 ou 4 réponses au choix
+{ id: 2, theme: "Sourire", question: "…", answers: [ /* 3-4 */ ] }
+
+// forme OUI / NON, où le NON se dérobe
+{
+  id: 8,
+  theme: "Émotions",
+  mode: "yes-no",
+  question: "…tu dirais oui ?",
+  yesFinalText: "OUI, ÉVIDEMMENT",   // libellé du OUI une fois le NON parti
+  answers: [
+    { id: "yes", emoji: "❤️", text: "OUI", reaction: "…" },
+    { id: "no",  emoji: "😏", text: "NON" },   // celui qui fuit
+  ],
+}
+```
+
+Les questions 8 et 10 utilisent ce mode. Pour l'appliquer ailleurs, il
+suffit d'ajouter `mode: "yes-no"` et de ramener `answers` à deux entrées,
+le OUI en premier. Les piques du bouton fuyant sont dans le même fichier
+(`evasiveTaunts`, `evasiveSurrender`).
+
 Dans n'importe quel texte, deux jetons sont remplacés automatiquement :
 
 | Jeton    | Devient             |
@@ -120,6 +145,8 @@ components/
 ├── AnswerButton.tsx    un bouton de réponse
 ├── ProgressBar.tsx     « Question 4 sur 10 » + barre animée
 ├── ReactionMessage.tsx la petite pique après un choix
+├── YesNoAnswers.tsx    le duo OUI / NON et ses piques
+├── EvasiveButton.tsx   le bouton qui se dérobe (souris, doigt, stylet)
 ├── ResultScreen.tsx    le verdict, révélé au fil du scroll
 ├── MusicPlayer.tsx     le bouton 🎵 (jamais de lecture automatique)
 ├── ShareButtons.tsx    WhatsApp + copier le lien
@@ -149,6 +176,44 @@ lib/quiz-store.tsx      l'état de la partie, partagé entre les trois écrans
   et pas seulement l'événement `onError`.
 - **`prefers-reduced-motion` est respecté** : les particules disparaissent et
   les transitions se réduisent pour qui a désactivé les animations.
+
+### Le bouton NON qui s'échappe
+
+`EvasiveButton` est autonome et réutilisable :
+
+```tsx
+<EvasiveButton
+  label="😏 NON"
+  evasive
+  maxAttempts={7}
+  playAreaRef={areaRef}   // la zone où il a le droit de fuir
+  avoidRef={yesRef}       // ce qu'il ne doit jamais recouvrir
+  onEscape={setAttempts}
+  onSurrender={() => setHasSurrendered(true)}
+  onClick={() => onSelect(no)}
+/>
+```
+
+- **Un seul code pour la souris, le doigt et le stylet** : tout passe par les
+  Pointer Events. À la souris il fuit *avant* le survol, par détection de
+  proximité ; au doigt il fuit sur `pointerdown`, donc avant que le clic
+  ne parte.
+- **Il ne s'active jamais au pointeur.** On ne peut pas distinguer un clic
+  tactile d'une activation clavier — Chrome met `event.detail` à `0` dans les
+  deux cas — donc le clic est toujours bloqué et le clavier est traité à part,
+  dans `onKeyDown`. Tab puis Entrée fonctionnent : le quiz ne bloque personne.
+- **Il ne peut pas casser la page.** Il est en position absolue dans sa zone
+  de jeu et n'est déplacé que par des transformations : jamais de scroll
+  horizontal, jamais de barre de défilement, jamais de hauteur qui change.
+  Le bloc des piques a une hauteur fixe pour la même raison.
+- **Les destinations sont calculées, jamais codées en dur** : à chaque
+  esquive il tire des positions au hasard dans sa zone, écarte celles qui
+  sont trop proches du doigt, celles qui recouvriraient le OUI et celles
+  qui sont hors bornes, puis en choisit une. Si aucune ne passe, les
+  contraintes sont relâchées une à une — il reste toujours une issue.
+- **La difficulté monte puis retombe** : il accélère jusqu'aux trois quarts
+  des tentatives, puis s'essouffle et se laisse approcher. Au bout de sept
+  esquives il renonce, s'évapore, et le OUI devient « OUI, ÉVIDEMMENT ».
 
 ---
 

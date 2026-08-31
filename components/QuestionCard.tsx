@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import AnswerButton from "@/components/AnswerButton";
+import YesNoAnswers from "@/components/YesNoAnswers";
 import type { Answer, Question } from "@/data/questions";
 import { personalize } from "@/lib/quiz";
 
@@ -41,18 +42,22 @@ export default function QuestionCard({
         </h1>
       </motion.header>
 
-      <div className="flex flex-col gap-2">
-        {question.answers.map((answer, index) => (
-          <AnswerButton
-            key={answer.id}
-            answer={answer}
-            index={index}
-            isSelected={selectedAnswerId === answer.id}
-            isLocked={isLocked}
-            onSelect={onSelect}
-          />
-        ))}
-      </div>
+      {question.mode === "yes-no" && question.answers.length === 2 ? (
+        <YesNoAnswers question={question} isLocked={isLocked} onSelect={onSelect} />
+      ) : (
+        <div className="flex flex-col gap-2">
+          {question.answers.map((answer, index) => (
+            <AnswerButton
+              key={answer.id}
+              answer={answer}
+              index={index}
+              isSelected={selectedAnswerId === answer.id}
+              isLocked={isLocked}
+              onSelect={onSelect}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

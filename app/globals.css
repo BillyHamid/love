@@ -26,6 +26,22 @@
     -webkit-text-size-adjust: 100%;
   }
 
+  /*
+   * Le bouton NON se déplace par transformation à l'intérieur de sa zone,
+   * donc il ne peut pas élargir la page. Ces deux règles sont le filet de
+   * sécurité : jamais de défilement horizontal, jamais de zoom au double-tap.
+   */
+  html,
+  body {
+    overflow-x: hidden;
+  }
+
+  button,
+  a,
+  [role="button"] {
+    touch-action: manipulation;
+  }
+
   body {
     background-color: var(--color-cream);
     color: var(--color-ink);

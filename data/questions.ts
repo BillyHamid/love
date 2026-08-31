@@ -23,6 +23,13 @@ export interface Question {
   id: number;
   /** Étape émotionnelle, affichée discrètement au-dessus de la question. */
   theme: string;
+  /**
+   * `"yes-no"` affiche un duo OUI / NON dont le NON se dérobe.
+   * `answers` doit alors contenir exactement deux réponses, le OUI d'abord.
+   */
+  mode?: "choice" | "yes-no";
+  /** Libellé du OUI une fois que le NON a renoncé. */
+  yesFinalText?: string;
   /** Phrase d’accroche facultative, au-dessus du thème. */
   intro?: string;
   question: string;
@@ -165,17 +172,18 @@ export const questions: Question[] = [
   {
     id: 8,
     theme: "Émotions",
+    mode: "yes-no",
     question:
-      "Si je venais te chercher maintenant pour passer la soirée avec toi, tu dirais…",
+      "Si je venais te chercher maintenant pour passer la soirée avec toi… tu dirais oui ?",
+    yesFinalText: "OUI, ÉVIDEMMENT",
     answers: [
-      { id: "a", emoji: "🚗", text: "« Je suis déjà prête. »" },
-      { id: "b", emoji: "😏", text: "« Laisse-moi 10 minutes… ou 40. »" },
-      { id: "c", emoji: "🥹", text: "« Tu n’as même pas idée à quel point j’en avais envie. »" },
-      { id: "d", emoji: "😌", text: "« Viens. Et ne repars pas trop vite. »" },
-    ],
-    reactions: [
-      "Je note ça quelque part 😌",
-      "Tu es prévenue : je risque de le prendre au sérieux.",
+      {
+        id: "yes",
+        emoji: "❤️",
+        text: "OUI",
+        reaction: "Alors prépare-toi. Je ne plaisantais pas. 😌",
+      },
+      { id: "no", emoji: "😏", text: "NON" },
     ],
   },
   {
@@ -213,14 +221,30 @@ export const questions: Question[] = [
   {
     id: 10,
     theme: "La grande question",
+    mode: "yes-no",
     intro: "Dernière question, {elle}.",
+    yesFinalText: "OUI, ÉVIDEMMENT",
     question:
       "Après tout ce qu’on vient de parcourir… est-ce que tu réalises à quel point tu comptes pour moi ?",
     answers: [
-      { id: "a", emoji: "❤️", text: "Oui… et ça me fait quelque chose" },
-      { id: "b", emoji: "🥹", text: "Je commence seulement à comprendre" },
-      { id: "c", emoji: "😏", text: "Dis-le-moi encore une fois, j’aime bien" },
-      { id: "d", emoji: "🤍", text: "Je crois que oui. Mais redis-le quand même." },
+      { id: "yes", emoji: "❤️", text: "OUI" },
+      { id: "no", emoji: "😏", text: "NON" },
     ],
   },
 ];
+
+/**
+ * Les piques affichées au fil des tentatives sur le bouton NON.
+ * La dernière sert aussi quand il y a plus de tentatives que de messages.
+ */
+export const evasiveTaunts: string[] = [
+  "Hmm… essaie encore 😏",
+  "Tu pensais vraiment pouvoir cliquer dessus ? 😂",
+  "Même ton téléphone est de mon côté 😌",
+  "Pourquoi tu insistes autant ? 👀",
+  "Bon… tu veux vraiment dire NON ? 😏❤️",
+];
+
+/** Le mot de la fin, une fois que le bouton NON a renoncé. */
+export const evasiveSurrender =
+  "Bon… j’ai compris. Tu n’avais pas vraiment envie de dire non 😌❤️";
