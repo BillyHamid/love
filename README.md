@@ -14,7 +14,7 @@ un export statique : un dossier `out/` qu'on dépose où on veut.
 **Un seul fichier : [`lib/config.ts`](lib/config.ts).**
 
 ```ts
-girlfriendName: "Delphine",   // son prénom
+girlfriendName: "Audrey",     // son prénom
 boyfriendName:  "Billy",      // le tien
 finalMessage:   "…",          // ton mot personnel, révélé mot après mot
 shareMessage:   "…",          // le texte pré-rempli du partage WhatsApp

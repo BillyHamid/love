@@ -7,7 +7,7 @@
  */
 export const quizConfig = {
   /** Le prénom de ta copine. Apparaît à quelques moments choisis. */
-  girlfriendName: "Delphine",
+  girlfriendName: "Audrey",
 
   /** Ton prénom à toi. */
   boyfriendName: "Billy",
@@ -15,9 +15,10 @@ export const quizConfig = {
   /**
    * Le message personnel affiché tout à la fin, mot après mot.
    * Écris-le avec tes mots : c’est le cœur de l’expérience.
+   * `{elle}` reprend le prénom ci-dessus — un seul endroit à changer.
    */
   finalMessage:
-    "Delphine, derrière ce petit quiz se cache simplement une vérité : j’aime chaque moment passé avec toi et je suis heureux de t’avoir dans ma vie. ❤️",
+    "{elle}, derrière ce petit quiz se cache simplement une vérité : j’aime chaque moment passé avec toi et je suis heureux de t’avoir dans ma vie. ❤️",
 
   /** Message pré-rempli quand elle partage le quiz sur WhatsApp. */
   shareMessage:
