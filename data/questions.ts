@@ -30,6 +30,16 @@ export interface Question {
   mode?: "choice" | "yes-no";
   /** Libellé du OUI une fois que le NON a renoncé. */
   yesFinalText?: string;
+  /**
+   * Nombre d'esquives avant que le NON renonce. Défaut : 7.
+   * Il augmente d'une question OUI/NON à la suivante — la plaisanterie
+   * s'étire au fil du quiz au lieu de se répéter à l'identique.
+   */
+  evasiveAttempts?: number;
+  /** Piques propres à cette question. À défaut, `evasiveTaunts` sert. */
+  taunts?: string[];
+  /** Mot de la fin propre à cette question. À défaut, `evasiveSurrender`. */
+  surrenderMessage?: string;
   /** Phrase d’accroche facultative, au-dessus du thème. */
   intro?: string;
   question: string;
@@ -77,13 +87,25 @@ export const questions: Question[] = [
   {
     id: 2,
     theme: "Sourire",
-    question: "Qu’est-ce qui te fait le plus sourire chez moi ?",
+    mode: "yes-no",
+    question: "Avoue : je te fais sourire même quand tu essaies de résister ?",
+    yesFinalText: "OUI, ÉVIDEMMENT",
+    evasiveAttempts: 3,
     answers: [
-      { id: "a", emoji: "😄", text: "Ta façon de me faire rire pour rien" },
-      { id: "b", emoji: "🫠", text: "Ce regard quand tu prépares une bêtise" },
-      { id: "c", emoji: "🤗", text: "Ta manière de me rassurer en deux mots" },
-      { id: "d", emoji: "😌", text: "Le fait que tu sois là, tout simplement" },
+      {
+        id: "yes",
+        emoji: "❤️",
+        text: "OUI",
+        reaction: "Je le savais. Tu es beaucoup trop facile à lire. 😌",
+      },
+      { id: "no", emoji: "😏", text: "NON" },
     ],
+    taunts: [
+      "Hmm… essaie encore 😏",
+      "Tu pensais vraiment pouvoir cliquer dessus ? 😂",
+      "Bon. On sait tous les deux ce que tu vas répondre.",
+    ],
+    surrenderMessage: "Voilà. C’était plus simple d’avouer 😌",
   },
   {
     id: 3,
@@ -104,19 +126,27 @@ export const questions: Question[] = [
   {
     id: 4,
     theme: "Sentiments",
-    question: "Il y a eu un moment où tu t’es dit « lui, il est différent ». C’était…",
+    mode: "yes-no",
+    question:
+      "Il y a eu un moment précis où tu t’es dit « lui, il est différent ». Je me trompe ?",
+    yesFinalText: "OUI, ÉVIDEMMENT",
+    evasiveAttempts: 4,
     answers: [
-      { id: "a", emoji: "✨", text: "Dès le début, honnêtement" },
-      { id: "b", emoji: "🕰️", text: "Petit à petit, sans m’en rendre compte" },
-      { id: "c", emoji: "💬", text: "Le jour où tu m’as dit exactement ce qu’il fallait" },
       {
-        id: "d",
-        emoji: "🤫",
-        text: "Ça, je le garde pour moi",
-        reaction: "Tu crois vraiment que je vais laisser passer ça ? 😏",
+        id: "yes",
+        emoji: "❤️",
+        text: "OUI",
+        reaction: "Un jour tu me diras lequel. J’attendrai le temps qu’il faudra.",
       },
+      { id: "no", emoji: "😏", text: "NON" },
     ],
-    reactions: ["Je note ça quelque part 😌", "Voilà une réponse que je garde."],
+    taunts: [
+      "Non ? Vraiment ? 👀",
+      "Ce bouton n’a pas envie de te laisser mentir.",
+      "Même ton téléphone est de mon côté 😌",
+      "Allez. Dis-le.",
+    ],
+    surrenderMessage: "Tu vois. Tu le savais déjà 😌",
   },
   {
     id: 5,
@@ -137,20 +167,28 @@ export const questions: Question[] = [
   {
     id: 6,
     theme: "Attraction",
+    mode: "yes-no",
     intro: "Sois honnête. Personne ne regarde. 😌",
-    question: "Ce qui t’attire vraiment chez moi, c’est…",
+    question: "Est-ce que tu me trouves dangereusement attirant ?",
+    yesFinalText: "OUI, ÉVIDEMMENT",
+    evasiveAttempts: 5,
     answers: [
-      { id: "a", emoji: "🧠", text: "Ta tête. Ta façon de penser." },
-      { id: "b", emoji: "🎙️", text: "Ta voix" },
-      { id: "c", emoji: "💪", text: "Tes bras. Disons-le." },
       {
-        id: "d",
-        emoji: "🔥",
-        text: "Le fait que tu saches exactement ce que tu fais",
-        reaction: "Ça, c’était la bonne réponse. 😏",
+        id: "yes",
+        emoji: "❤️",
+        text: "OUI",
+        reaction: "Dangereusement. Retiens bien ce mot-là. 😏",
       },
+      { id: "no", emoji: "😏", text: "NON" },
     ],
-    reactions: ["Cette réponse me plaît beaucoup…", "Intéressant. Très intéressant. 👀"],
+    taunts: [
+      "Ah non, pas celui-là 😏",
+      "Tu insistes… c’est déjà une réponse.",
+      "Il court plus vite que ta mauvaise foi 😂",
+      "Pourquoi tu t’acharnes autant ? 👀",
+      "Tu veux vraiment dire non, là ?",
+    ],
+    surrenderMessage: "Il a abandonné. Comme toi, dans trois secondes 😏",
   },
   {
     id: 7,
@@ -176,6 +214,7 @@ export const questions: Question[] = [
     question:
       "Si je venais te chercher maintenant pour passer la soirée avec toi… tu dirais oui ?",
     yesFinalText: "OUI, ÉVIDEMMENT",
+    evasiveAttempts: 6,
     answers: [
       {
         id: "yes",
@@ -185,6 +224,15 @@ export const questions: Question[] = [
       },
       { id: "no", emoji: "😏", text: "NON" },
     ],
+    taunts: [
+      "Trop lent 😏",
+      "Tu pensais vraiment pouvoir cliquer dessus ? 😂",
+      "Même ton téléphone est de mon côté 😌",
+      "Il commence à s’amuser, là.",
+      "Pourquoi tu insistes autant ? 👀",
+      "Bon… tu veux vraiment dire NON ? 😏❤️",
+    ],
+    surrenderMessage: "Ce bouton n’a jamais eu la moindre chance 😌",
   },
   {
     id: 9,
@@ -224,11 +272,26 @@ export const questions: Question[] = [
     mode: "yes-no",
     intro: "Dernière question, {elle}.",
     yesFinalText: "OUI, ÉVIDEMMENT",
+    evasiveAttempts: 7,
     question:
       "Après tout ce qu’on vient de parcourir… est-ce que tu réalises à quel point tu comptes pour moi ?",
     answers: [
-      { id: "yes", emoji: "❤️", text: "OUI" },
+      {
+        id: "yes",
+        emoji: "❤️",
+        text: "OUI",
+        reaction: "Alors je n’ai plus rien à ajouter. ❤️",
+      },
       { id: "no", emoji: "😏", text: "NON" },
+    ],
+    taunts: [
+      "Hmm… essaie encore 😏",
+      "Tu pensais vraiment pouvoir cliquer dessus ? 😂",
+      "Même ton téléphone est de mon côté 😌",
+      "Pourquoi tu insistes autant ? 👀",
+      "Bon… tu veux vraiment dire NON ? 😏❤️",
+      "Tu sais très bien que ce n’est pas la vraie réponse.",
+      "Dernière chance de dire la vérité 😌",
     ],
   },
 ];

@@ -45,10 +45,24 @@ Une question peut prendre deux formes :
 }
 ```
 
-Les questions 8 et 10 utilisent ce mode. Pour l'appliquer ailleurs, il
-suffit d'ajouter `mode: "yes-no"` et de ramener `answers` à deux entrées,
-le OUI en premier. Les piques du bouton fuyant sont dans le même fichier
-(`evasiveTaunts`, `evasiveSurrender`).
+Les questions **2, 4, 6, 8 et 10** utilisent ce mode : une question sur
+deux, en alternance avec les questions à choix. Pour l'appliquer ailleurs,
+il suffit d'ajouter `mode: "yes-no"` et de ramener `answers` à deux
+entrées, le OUI en premier.
+
+Trois réglages facultatifs empêchent la plaisanterie de se répéter à
+l'identique cinq fois de suite :
+
+```ts
+evasiveAttempts: 5,          // esquives avant qu'il renonce (défaut : 7)
+taunts: ["…", "…"],          // piques propres à la question
+surrenderMessage: "…",       // son mot de la fin
+```
+
+Le nombre d'esquives monte au fil du quiz — 3, 4, 5, 6 puis 7 — et chaque
+question a ses propres piques, si bien que le bouton devient un gag
+récurrent qui s'étire au lieu de lasser. Sans ces champs, les valeurs
+communes du même fichier servent (`evasiveTaunts`, `evasiveSurrender`).
 
 Dans n'importe quel texte, deux jetons sont remplacés automatiquement :
 
@@ -212,8 +226,9 @@ lib/quiz-store.tsx      l'état de la partie, partagé entre les trois écrans
   qui sont hors bornes, puis en choisit une. Si aucune ne passe, les
   contraintes sont relâchées une à une — il reste toujours une issue.
 - **La difficulté monte puis retombe** : il accélère jusqu'aux trois quarts
-  des tentatives, puis s'essouffle et se laisse approcher. Au bout de sept
-  esquives il renonce, s'évapore, et le OUI devient « OUI, ÉVIDEMMENT ».
+  des tentatives, puis s'essouffle et se laisse approcher. Une fois son
+  quota d'esquives épuisé il renonce, s'évapore, et le OUI devient
+  « OUI, ÉVIDEMMENT ».
 
 ---
 

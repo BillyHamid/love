@@ -17,7 +17,8 @@ interface YesNoAnswersProps {
   onSelect: (answer: Answer) => void;
 }
 
-const MAX_ATTEMPTS = 7;
+/** Utilisé quand la question ne fixe pas son propre nombre d'esquives. */
+const DEFAULT_MAX_ATTEMPTS = 7;
 
 /**
  * Le duo OUI / NON, où le NON se dérobe.
@@ -37,12 +38,15 @@ export default function YesNoAnswers({ question, isLocked, onSelect }: YesNoAnsw
   const [yes, no] = question.answers;
   if (!yes || !no) return null;
 
+  const maxAttempts = question.evasiveAttempts ?? DEFAULT_MAX_ATTEMPTS;
+  const taunts = question.taunts ?? evasiveTaunts;
+
   const yesLabel = hasSurrendered ? (question.yesFinalText ?? "OUI, ÉVIDEMMENT") : yes.text;
 
   const message = hasSurrendered
-    ? evasiveSurrender
+    ? (question.surrenderMessage ?? evasiveSurrender)
     : attempts > 0
-      ? (evasiveTaunts[Math.min(attempts, evasiveTaunts.length) - 1] ?? null)
+      ? (taunts[Math.min(attempts, taunts.length) - 1] ?? null)
       : null;
 
   return (
@@ -64,7 +68,7 @@ export default function YesNoAnswers({ question, isLocked, onSelect }: YesNoAnsw
           // soudain attrapable pendant la transition serait déroutant.
           // Un choix tardif est de toute façon ignoré par le QuizCard.
           evasive
-          maxAttempts={MAX_ATTEMPTS}
+          maxAttempts={maxAttempts}
           playAreaRef={areaRef}
           avoidRef={yesRef}
           onEscape={setAttempts}
