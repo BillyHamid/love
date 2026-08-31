@@ -7,7 +7,7 @@ import { Heart, RotateCcw } from "lucide-react";
 import FloatingHearts from "@/components/FloatingHearts";
 import TypewriterText from "@/components/TypewriterText";
 import CouplePhoto from "@/components/CouplePhoto";
-import ShareButtons from "@/components/ShareButtons";
+import Confetti from "@/components/Confetti";
 import { useQuiz } from "@/lib/quiz-store";
 import { personalize } from "@/lib/quiz";
 import { quizConfig } from "@/lib/config";
@@ -62,6 +62,7 @@ export default function ResultScreen() {
 
   return (
     <div className="relative flex flex-1 flex-col justify-center py-8">
+      <Confetti />
       <FloatingHearts count={16} variant="ambient" />
 
       <div className="relative z-10 flex flex-col gap-4">
@@ -161,17 +162,13 @@ export default function ResultScreen() {
         {/* Photo optionnelle : rien ne casse si `public/couple.jpg` est absent */}
         <CouplePhoto src={quizConfig.photoSrc} />
 
-        {/* Partage + rejouer */}
-        <motion.section {...inView} className="card-surface px-6 py-7">
-          <motion.div variants={line}>
-            <ShareButtons />
-          </motion.div>
-
+        {/* Rejouer */}
+        <motion.section {...inView} className="card-surface px-6 py-6">
           <motion.button
             variants={line}
             type="button"
             onClick={replay}
-            className="mt-5 flex min-h-11 w-full items-center justify-center gap-2 text-[0.9rem] font-medium text-muted transition-colors hover:text-rose"
+            className="flex min-h-11 w-full touch-manipulation items-center justify-center gap-2 text-[0.9rem] font-medium text-muted transition-colors hover:text-rose"
           >
             <RotateCcw className="size-4" aria-hidden="true" />
             Rejouer ❤️

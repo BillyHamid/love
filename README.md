@@ -1,8 +1,12 @@
 # 💌 Le petit quiz
 
 Une petite web app romantique à envoyer par un simple lien WhatsApp.
-10 questions, aucune bonne ou mauvaise réponse — juste une montée
-progressive de complicité, puis un écran final qui dit l'essentiel.
+
+Ce n'est pas un quiz : c'est une histoire en **cinq actes**. Chaque acte
+pose son décor en quelques lignes, puis s'interrompt pour poser une
+question. Aucune bonne ou mauvaise réponse — juste une montée progressive
+de complicité, un bouton NON qu'on n'attrape jamais, et un écran final
+sous les confettis.
 
 Pas de backend, pas de base de données, pas de compte. Tout tient dans
 un export statique : un dossier `out/` qu'on dépose où on veut.
@@ -20,24 +24,37 @@ finalMessage:   "…",          // ton mot personnel, révélé mot après mot
 shareMessage:   "…",          // le texte pré-rempli du partage WhatsApp
 ```
 
-**Les questions : [`data/questions.ts`](data/questions.ts).**
-Tout y est centralisé — texte, emoji, réactions. Rien n'est écrit en dur
-dans les composants : ajouter ou retirer une question suffit, la barre de
-progression et l'écran final s'ajustent seuls.
+**Le récit : [`data/story.ts`](data/story.ts).**
+Tout y est centralisé — scènes, questions, réactions, piques. L'ordre du
+tableau `story` est l'ordre du récit : déplacer un moment suffit, la barre
+de progression suit.
 
-Une question peut prendre deux formes :
+Un moment est soit une **scène**, soit une **question** :
 
 ```ts
-// forme normale : 3 ou 4 réponses au choix
-{ id: 2, theme: "Sourire", question: "…", answers: [ /* 3-4 */ ] }
-
-// forme OUI / NON, où le NON se dérobe
+// une scène : quelques lignes qui se posent, puis on continue
 {
-  id: 8,
-  theme: "Émotions",
+  id: "scene-3",
+  act: "Acte III — Plus près",
+  kind: "scene",
+  lines: ["Bon. On va être honnêtes deux minutes.", "…"],
+  cta: "Je suis prête",          // défaut : « Continuer »
+}
+
+// une question à choix
+{ id: "q-nous", act: "…", kind: "question", question: "…", answers: [ /* 3-4 */ ] }
+
+// une question OUI / NON, où le NON se dérobe
+{
+  id: "q-attirant",
+  act: "…",
+  kind: "question",
   mode: "yes-no",
-  question: "…tu dirais oui ?",
+  question: "Est-ce que tu me trouves dangereusement attirant ?",
   yesFinalText: "OUI, ÉVIDEMMENT",   // libellé du OUI une fois le NON parti
+  evasiveAttempts: 5,                // esquives avant qu'il renonce (défaut : 7)
+  taunts: ["…"],                     // piques propres à la question
+  surrenderMessage: "…",             // son mot de la fin
   answers: [
     { id: "yes", emoji: "❤️", text: "OUI", reaction: "…" },
     { id: "no",  emoji: "😏", text: "NON" },   // celui qui fuit
@@ -45,31 +62,12 @@ Une question peut prendre deux formes :
 }
 ```
 
-Les questions **2, 4, 6, 8 et 10** utilisent ce mode : une question sur
-deux, en alternance avec les questions à choix. Pour l'appliquer ailleurs,
-il suffit d'ajouter `mode: "yes-no"` et de ramener `answers` à deux
-entrées, le OUI en premier.
-
-Trois réglages facultatifs empêchent la plaisanterie de se répéter à
-l'identique cinq fois de suite :
-
-```ts
-evasiveAttempts: 5,          // esquives avant qu'il renonce (défaut : 7)
-taunts: ["…", "…"],          // piques propres à la question
-surrenderMessage: "…",       // son mot de la fin
-```
-
-Le nombre d'esquives monte au fil du quiz — 3, 4, 5, 6 puis 7 — et chaque
-question a ses propres piques, si bien que le bouton devient un gag
-récurrent qui s'étire au lieu de lasser. Sans ces champs, les valeurs
-communes du même fichier servent (`evasiveTaunts`, `evasiveSurrender`).
-
-Dans n'importe quel texte, deux jetons sont remplacés automatiquement :
-
-| Jeton    | Devient             |
-| -------- | ------------------- |
-| `{elle}` | `girlfriendName`    |
-| `{moi}`  | `boyfriendName`     |
+Le récit compte 15 moments : 5 scènes, 5 questions à choix et 5 questions
+OUI / NON, une par acte. Le nombre d'esquives monte d'un acte à l'autre —
+3, 4, 5, 6 puis 7 — et chaque question a ses propres piques, si bien que
+le bouton devient un gag récurrent qui s'étire au lieu de lasser. Sans ces
+champs, les valeurs communes du même fichier servent (`evasiveTaunts`,
+`evasiveSurrender`).
 
 **Photo et musique (facultatives) : dossier `public/`.**
 
@@ -148,36 +146,37 @@ configuration.
 app/
 ├── layout.tsx          police, métadonnées WhatsApp, état global, bouton musique
 ├── page.tsx            écran d'accueil
-├── quiz/page.tsx       le quiz
+├── quiz/page.tsx       le récit
 ├── result/page.tsx     l'écran final
 └── globals.css         palette et styles de base (Tailwind v4)
 
 components/
 ├── WelcomeScreen.tsx   l'accueil et son animation d'apparition
-├── QuizCard.tsx        l'orchestrateur : enchaînement, réactions, finale
+├── QuizCard.tsx        l'orchestrateur : enchaîne scènes et questions
+├── SceneCard.tsx       un temps de récit, ligne après ligne
 ├── QuestionCard.tsx    une question et ses réponses
 ├── AnswerButton.tsx    un bouton de réponse
-├── ProgressBar.tsx     « Question 4 sur 10 » + barre animée
+├── ProgressBar.tsx     l'acte en cours + barre animée
 ├── ReactionMessage.tsx la petite pique après un choix
 ├── YesNoAnswers.tsx    le duo OUI / NON et ses piques
 ├── EvasiveButton.tsx   le bouton qui se dérobe (souris, doigt, stylet)
 ├── ResultScreen.tsx    le verdict, révélé au fil du scroll
+├── Confetti.tsx        la salve de l'écran final
 ├── MusicPlayer.tsx     le bouton 🎵 (jamais de lecture automatique)
-├── ShareButtons.tsx    WhatsApp + copier le lien
 ├── TypewriterText.tsx  le message final, mot après mot
 ├── CouplePhoto.tsx     la photo, si elle existe
 └── FloatingHearts.tsx  les particules
 
-data/questions.ts       les 10 questions — le seul endroit où les écrire
+data/story.ts           tout le récit — le seul endroit où écrire du texte
 lib/config.ts           prénoms, message final, chemins des médias
-lib/quiz.ts             progression, réactions, lien de partage
+lib/quiz.ts             progression, réactions, personnalisation
 lib/quiz-store.tsx      l'état de la partie, partagé entre les trois écrans
 ```
 
 ### Quelques choix
 
 - **L'état vit dans un contexte React**, pas dans l'URL : les trois écrans se
-  partagent la même partie, et une copie du lien ne divulgue aucune réponse.
+  partagent le même récit, et une copie du lien ne divulgue aucune réponse.
 - **Il survit à un rafraîchissement** via `sessionStorage` — utile dans le
   navigateur intégré de WhatsApp, qui recharge volontiers les pages. Il est
   relu après le montage, jamais pendant le rendu, pour éviter tout écart
@@ -234,9 +233,9 @@ lib/quiz-store.tsx      l'état de la partie, partagé entre les trois écrans
 
 ## 5. Notes
 
-- Le bouton WhatsApp passe par `https://wa.me/?text=…` : il ouvre
-  l'application native sur téléphone, WhatsApp Web sur ordinateur.
-- « Copier le lien » utilise l'API presse-papiers, avec une invite de
-  secours si le navigateur la refuse (contexte non sécurisé).
 - L'aperçu du lien dans WhatsApp (titre et description) se règle dans
   `metadata`, en haut de `app/layout.tsx`.
+- Les confettis de l'écran final sont de simples éléments animés, sans
+  canvas ni dépendance, retirés du DOM une fois la salve terminée. Ils
+  disparaissent si le réglage « réduire les animations » est actif.
+- Il n'y a pas de bouton de partage : le lien, c'est toi qui l'envoies.

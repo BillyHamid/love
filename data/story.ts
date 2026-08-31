@@ -1,9 +1,10 @@
 /**
- * Les 10 questions du quiz.
+ * L’histoire, du début à la fin.
  *
- * Tout se passe ici : pour ajouter, retirer ou réécrire une question,
- * il n’y a aucun composant à toucher. La barre de progression, les
- * réactions et l’écran final s’adaptent automatiquement au tableau.
+ * Tout est ici : les scènes narratives, les questions, les réactions, les
+ * piques du bouton NON. Aucun texte n’est écrit en dur dans les composants,
+ * et l’ordre du tableau est l’ordre du récit — déplacer une scène ou une
+ * question suffit, la barre de progression suit.
  *
  * Jetons disponibles dans n’importe quel texte :
  *   {elle} → quizConfig.girlfriendName
@@ -19,43 +20,76 @@ export interface Answer {
   reaction?: string;
 }
 
-export interface Question {
-  id: number;
-  /** Étape émotionnelle, affichée discrètement au-dessus de la question. */
-  theme: string;
+interface BaseBeat {
+  id: string;
+  /** Acte auquel appartient ce moment, affiché en tête de carte. */
+  act: string;
+}
+
+/** Un temps de récit : quelques lignes qui se posent, puis on continue. */
+export interface Scene extends BaseBeat {
+  kind: "scene";
+  lines: string[];
+  /** Libellé du bouton. Défaut : « Continuer ». */
+  cta?: string;
+}
+
+export interface Question extends BaseBeat {
+  kind: "question";
   /**
    * `"yes-no"` affiche un duo OUI / NON dont le NON se dérobe.
-   * `answers` doit alors contenir exactement deux réponses, le OUI d'abord.
+   * `answers` doit alors contenir exactement deux réponses, le OUI d’abord.
    */
   mode?: "choice" | "yes-no";
+  /** Phrase d’accroche facultative, au-dessus de la question. */
+  intro?: string;
+  question: string;
+  answers: Answer[];
+  /**
+   * Réactions génériques tirées au sort si la réponse choisie n’a pas la
+   * sienne. Absent = pas de réaction sur cette question.
+   */
+  reactions?: string[];
   /** Libellé du OUI une fois que le NON a renoncé. */
   yesFinalText?: string;
   /**
-   * Nombre d'esquives avant que le NON renonce. Défaut : 7.
-   * Il augmente d'une question OUI/NON à la suivante — la plaisanterie
-   * s'étire au fil du quiz au lieu de se répéter à l'identique.
+   * Nombre d’esquives avant que le NON renonce. Défaut : 7.
+   * Il augmente d’un acte à l’autre — la plaisanterie s’étire au fil du
+   * récit au lieu de se répéter à l’identique.
    */
   evasiveAttempts?: number;
   /** Piques propres à cette question. À défaut, `evasiveTaunts` sert. */
   taunts?: string[];
   /** Mot de la fin propre à cette question. À défaut, `evasiveSurrender`. */
   surrenderMessage?: string;
-  /** Phrase d’accroche facultative, au-dessus du thème. */
-  intro?: string;
-  question: string;
-  answers: Answer[];
-  /**
-   * Réactions génériques tirées au sort si la réponse choisie
-   * n’a pas la sienne. Absent = pas de réaction sur cette question.
-   */
-  reactions?: string[];
 }
 
-export const questions: Question[] = [
+export type Beat = Scene | Question;
+
+const ACTE_I = "Acte I — Le début";
+const ACTE_II = "Acte II — Ce que je remarque";
+const ACTE_III = "Acte III — Plus près";
+const ACTE_IV = "Acte IV — Ce qu’on a déjà";
+const ACTE_V = "Acte V — La vérité";
+
+export const story: Beat[] = [
+  // ───────────────────────────── ACTE I ─────────────────────────────
   {
-    id: 1,
-    theme: "Complicité",
-    intro: "Prête, {elle} ? 😏",
+    id: "scene-1",
+    act: ACTE_I,
+    kind: "scene",
+    lines: [
+      "Il y a une chose que je n’ai jamais pris le temps de te dire correctement.",
+      "Alors j’ai construit ça. Pour toi. Juste pour toi.",
+      "Trois minutes. Une seule règle : sois honnête avec moi.",
+    ],
+    cta: "Je t’écoute ❤️",
+  },
+  {
+    id: "q-nom",
+    act: ACTE_I,
+    kind: "question",
+    intro: "Commençons doucement, {elle}.",
     question: "Quand tu vois mon nom apparaître sur ton téléphone, tu…",
     answers: [
       {
@@ -85,8 +119,9 @@ export const questions: Question[] = [
     ],
   },
   {
-    id: 2,
-    theme: "Sourire",
+    id: "q-sourire",
+    act: ACTE_I,
+    kind: "question",
     mode: "yes-no",
     question: "Avoue : je te fais sourire même quand tu essaies de résister ?",
     yesFinalText: "OUI, ÉVIDEMMENT",
@@ -107,9 +142,22 @@ export const questions: Question[] = [
     ],
     surrenderMessage: "Voilà. C’était plus simple d’avouer 😌",
   },
+
+  // ───────────────────────────── ACTE II ────────────────────────────
   {
-    id: 3,
-    theme: "Tendresse",
+    id: "scene-2",
+    act: ACTE_II,
+    kind: "scene",
+    lines: [
+      "On dit qu’on finit toujours par s’habituer aux gens.",
+      "Je n’ai jamais réussi à m’habituer à toi.",
+      "Il y a toujours un détail qui me prend au dépourvu.",
+    ],
+  },
+  {
+    id: "q-nous",
+    act: ACTE_II,
+    kind: "question",
     question: "Ta version préférée de nous deux, c’est…",
     answers: [
       { id: "a", emoji: "🛋️", text: "Un film, une couverture, zéro envie de bouger" },
@@ -124,8 +172,9 @@ export const questions: Question[] = [
     ],
   },
   {
-    id: 4,
-    theme: "Sentiments",
+    id: "q-different",
+    act: ACTE_II,
+    kind: "question",
     mode: "yes-no",
     question:
       "Il y a eu un moment précis où tu t’es dit « lui, il est différent ». Je me trompe ?",
@@ -148,9 +197,23 @@ export const questions: Question[] = [
     ],
     surrenderMessage: "Tu vois. Tu le savais déjà 😌",
   },
+
+  // ──────────────────────────── ACTE III ────────────────────────────
   {
-    id: 5,
-    theme: "Séduction",
+    id: "scene-3",
+    act: ACTE_III,
+    kind: "scene",
+    lines: [
+      "Bon. On va être honnêtes deux minutes.",
+      "Il y a des choses que je pense très fort, et que je ne dis jamais à voix haute.",
+      "Ce chapitre est pour celles-là. 😏",
+    ],
+    cta: "Je suis prête",
+  },
+  {
+    id: "q-deux",
+    act: ACTE_III,
+    kind: "question",
     question: "Qu’est-ce que tu préfères quand nous sommes tous les deux ?",
     answers: [
       { id: "a", emoji: "🫂", text: "Quand tu m’attires contre toi sans prévenir" },
@@ -165,8 +228,9 @@ export const questions: Question[] = [
     ],
   },
   {
-    id: 6,
-    theme: "Attraction",
+    id: "q-attirant",
+    act: ACTE_III,
+    kind: "question",
     mode: "yes-no",
     intro: "Sois honnête. Personne ne regarde. 😌",
     question: "Est-ce que tu me trouves dangereusement attirant ?",
@@ -190,9 +254,22 @@ export const questions: Question[] = [
     ],
     surrenderMessage: "Il a abandonné. Comme toi, dans trois secondes 😏",
   },
+
+  // ──────────────────────────── ACTE IV ─────────────────────────────
   {
-    id: 7,
-    theme: "Souvenirs",
+    id: "scene-4",
+    act: ACTE_IV,
+    kind: "scene",
+    lines: [
+      "On a déjà une histoire, tu sais.",
+      "Des fous rires, des soirées trop courtes, des silences confortables.",
+      "Et une longue liste de choses qu’on n’a pas encore vécues.",
+    ],
+  },
+  {
+    id: "q-souvenir",
+    act: ACTE_IV,
+    kind: "question",
     question: "Quel moment avec moi tu aimerais revivre, là, maintenant ?",
     answers: [
       { id: "a", emoji: "🌅", text: "Notre premier vrai moment à deux" },
@@ -208,8 +285,9 @@ export const questions: Question[] = [
     reactions: ["Je m’en souviens aussi, tu sais.", "Tu viens de me faire sourire."],
   },
   {
-    id: 8,
-    theme: "Émotions",
+    id: "q-ce-soir",
+    act: ACTE_IV,
+    kind: "question",
     mode: "yes-no",
     question:
       "Si je venais te chercher maintenant pour passer la soirée avec toi… tu dirais oui ?",
@@ -234,10 +312,24 @@ export const questions: Question[] = [
     ],
     surrenderMessage: "Ce bouton n’a jamais eu la moindre chance 😌",
   },
+
+  // ───────────────────────────── ACTE V ─────────────────────────────
   {
-    id: 9,
-    theme: "Question piège",
-    intro: "Attention. 👀",
+    id: "scene-5",
+    act: ACTE_V,
+    kind: "scene",
+    lines: [
+      "On y est.",
+      "Tout ce qui précède n’était qu’un prétexte.",
+      "Je voulais juste te garder un peu plus longtemps. 😌",
+    ],
+    cta: "Vas-y.",
+  },
+  {
+    id: "q-piege",
+    act: ACTE_V,
+    kind: "question",
+    intro: "Attention. Question piège. 👀",
     question: "Entre nous deux, qui tient le plus à l’autre ?",
     answers: [
       {
@@ -267,14 +359,15 @@ export const questions: Question[] = [
     ],
   },
   {
-    id: 10,
-    theme: "La grande question",
+    id: "q-finale",
+    act: ACTE_V,
+    kind: "question",
     mode: "yes-no",
     intro: "Dernière question, {elle}.",
-    yesFinalText: "OUI, ÉVIDEMMENT",
-    evasiveAttempts: 7,
     question:
       "Après tout ce qu’on vient de parcourir… est-ce que tu réalises à quel point tu comptes pour moi ?",
+    yesFinalText: "OUI, ÉVIDEMMENT",
+    evasiveAttempts: 7,
     answers: [
       {
         id: "yes",
@@ -296,10 +389,7 @@ export const questions: Question[] = [
   },
 ];
 
-/**
- * Les piques affichées au fil des tentatives sur le bouton NON.
- * La dernière sert aussi quand il y a plus de tentatives que de messages.
- */
+/** Piques par défaut, quand une question n’a pas les siennes. */
 export const evasiveTaunts: string[] = [
   "Hmm… essaie encore 😏",
   "Tu pensais vraiment pouvoir cliquer dessus ? 😂",
@@ -308,6 +398,6 @@ export const evasiveTaunts: string[] = [
   "Bon… tu veux vraiment dire NON ? 😏❤️",
 ];
 
-/** Le mot de la fin, une fois que le bouton NON a renoncé. */
+/** Le mot de la fin par défaut, une fois que le bouton NON a renoncé. */
 export const evasiveSurrender =
   "Bon… j’ai compris. Tu n’avais pas vraiment envie de dire non 😌❤️";

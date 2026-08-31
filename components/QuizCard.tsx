@@ -5,16 +5,17 @@ import { useRouter } from "next/navigation";
 import { AnimatePresence, motion, useAnimationControls, useReducedMotion } from "framer-motion";
 import ProgressBar from "@/components/ProgressBar";
 import QuestionCard from "@/components/QuestionCard";
+import SceneCard from "@/components/SceneCard";
 import ReactionMessage from "@/components/ReactionMessage";
 import FloatingHearts from "@/components/FloatingHearts";
 import { useQuiz } from "@/lib/quiz-store";
-import { getQuestion, getReaction, TOTAL_QUESTIONS } from "@/lib/quiz";
-import type { Answer } from "@/data/questions";
+import { getBeat, getReaction, TOTAL_BEATS } from "@/lib/quiz";
+import type { Answer } from "@/data/story";
 
-/** Temps de lecture d'une réaction, puis passage à la suite. */
+/** Temps de lecture d’une réaction, puis passage à la suite. */
 const REACTION_MS = 1400;
 const NO_REACTION_MS = 480;
-/** La dernière question mérite une sortie plus longue. */
+/** Le dernier moment mérite une sortie plus longue. */
 const FINALE_MS = 2200;
 
 export default function QuizCard() {
@@ -28,12 +29,12 @@ export default function QuizCard() {
   const [isFinale, setIsFinale] = useState(false);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const question = getQuestion(currentIndex);
-  const isLastQuestion = currentIndex === TOTAL_QUESTIONS - 1;
+  const beat = getBeat(currentIndex);
+  const isLastBeat = currentIndex === TOTAL_BEATS - 1;
 
-  // Le quiz est terminé (ou l'URL a été ouverte trop loin) : direction résultat.
+  // Le récit est terminé (ou l’URL a été ouverte trop loin) : direction résultat.
   useEffect(() => {
-    if (hydrated && currentIndex >= TOTAL_QUESTIONS) router.replace("/result/");
+    if (hydrated && currentIndex >= TOTAL_BEATS) router.replace("/result/");
   }, [hydrated, currentIndex, router]);
 
   // Un minuteur en cours ne doit jamais survivre au démontage.
@@ -41,12 +42,22 @@ export default function QuizCard() {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
   }, []);
 
+  /** Fin d’une scène : on avance, sans réaction ni verrouillage. */
+  const handleContinue = useCallback(() => {
+    if (isLocked) return;
+    setIsLocked(true);
+    timeoutRef.current = setTimeout(() => {
+      next();
+      setIsLocked(false);
+    }, 120);
+  }, [isLocked, next]);
+
   const handleSelect = useCallback(
     (chosen: Answer) => {
-      if (!question || isLocked) return;
+      if (!beat || beat.kind !== "question" || isLocked) return;
 
       setIsLocked(true);
-      answer(question.id, chosen.id);
+      answer(beat.id, chosen.id);
 
       // 2. la petite vibration visuelle de la carte
       if (!prefersReducedMotion) {
@@ -57,34 +68,28 @@ export default function QuizCard() {
       }
 
       // 3. la réaction, quand cette réponse en a une
-      const message = getReaction(question, chosen);
+      const message = getReaction(beat, chosen);
       setReaction(message);
 
-      if (isLastQuestion) setIsFinale(true);
+      if (isLastBeat) setIsFinale(true);
 
       // 4. la transition vers la suite
-      const delay = isLastQuestion
-        ? FINALE_MS
-        : message
-          ? REACTION_MS
-          : NO_REACTION_MS;
+      const delay = isLastBeat ? FINALE_MS : message ? REACTION_MS : NO_REACTION_MS;
 
       timeoutRef.current = setTimeout(() => {
         setReaction(null);
         next();
-        if (isLastQuestion) {
+        if (isLastBeat) {
           router.push("/result/");
         } else {
           setIsLocked(false);
         }
       }, delay);
     },
-    [question, isLocked, isLastQuestion, answer, next, router, cardControls, prefersReducedMotion],
+    [beat, isLocked, isLastBeat, answer, next, router, cardControls, prefersReducedMotion],
   );
 
-  if (!question) return null;
-
-  const selectedAnswerId = answers[question.id] ?? null;
+  if (!beat) return null;
 
   return (
     <div className="relative flex flex-1 flex-col justify-center py-4">
@@ -107,32 +112,39 @@ export default function QuizCard() {
       <motion.section
         animate={cardControls}
         className="card-surface relative z-10 px-5 py-6 sm:px-6"
-        aria-label={`Question ${currentIndex + 1} sur ${TOTAL_QUESTIONS}`}
+        aria-label={beat.act}
       >
-        <ProgressBar currentIndex={currentIndex} />
+        <ProgressBar currentIndex={currentIndex} label={beat.act} />
 
         <div className="mt-6 overflow-hidden">
           <AnimatePresence mode="wait" initial={false}>
             <motion.div
-              key={question.id}
+              key={beat.id}
               initial={{ opacity: 0, x: 28, scale: 0.985 }}
               animate={{ opacity: 1, x: 0, scale: 1 }}
               exit={{ opacity: 0, x: -28, scale: 0.985 }}
               transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
             >
-              <QuestionCard
-                question={question}
-                selectedAnswerId={selectedAnswerId}
-                isLocked={isLocked}
-                onSelect={handleSelect}
-              />
+              {beat.kind === "scene" ? (
+                <SceneCard scene={beat} onContinue={handleContinue} />
+              ) : (
+                <QuestionCard
+                  question={beat}
+                  selectedAnswerId={answers[beat.id] ?? null}
+                  isLocked={isLocked}
+                  onSelect={handleSelect}
+                />
+              )}
             </motion.div>
           </AnimatePresence>
         </div>
 
-        <div className="mt-4">
-          <ReactionMessage message={reaction} />
-        </div>
+        {/* Réservé aux questions : une scène n’a rien à commenter. */}
+        {beat.kind === "question" ? (
+          <div className="mt-4">
+            <ReactionMessage message={reaction} />
+          </div>
+        ) : null}
       </motion.section>
     </div>
   );

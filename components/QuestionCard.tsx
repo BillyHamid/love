@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import AnswerButton from "@/components/AnswerButton";
 import YesNoAnswers from "@/components/YesNoAnswers";
-import type { Answer, Question } from "@/data/questions";
+import type { Answer, Question } from "@/data/story";
 import { personalize } from "@/lib/quiz";
 
 interface QuestionCardProps {
@@ -32,10 +32,6 @@ export default function QuestionCard({
             {personalize(question.intro)}
           </p>
         ) : null}
-
-        <p className="mb-2.5 text-[0.7rem] font-semibold tracking-[0.18em] text-rose uppercase">
-          {question.theme}
-        </p>
 
         <h1 className="font-display text-[1.45rem] leading-[1.22] sm:text-[1.6rem] text-ink text-balance">
           {personalize(question.question)}

@@ -9,10 +9,10 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { TOTAL_QUESTIONS } from "@/lib/quiz";
+import { TOTAL_BEATS, TOTAL_QUESTIONS } from "@/lib/quiz";
 
-/** Réponses choisies, indexées par `question.id`. */
-export type AnswerMap = Record<number, string>;
+/** Réponses choisies, indexées par l’identifiant du moment de récit. */
+export type AnswerMap = Record<string, string>;
 
 interface QuizState {
   currentIndex: number;
@@ -24,7 +24,7 @@ interface QuizContextValue extends QuizState {
   hydrated: boolean;
   answeredCount: number;
   isComplete: boolean;
-  answer: (questionId: number, answerId: string) => void;
+  answer: (beatId: string, answerId: string) => void;
   next: () => void;
   reset: () => void;
 }
@@ -45,7 +45,7 @@ function readStoredState(): QuizState | null {
       return null;
     }
     return {
-      currentIndex: Math.min(Math.max(currentIndex, 0), TOTAL_QUESTIONS),
+      currentIndex: Math.min(Math.max(currentIndex, 0), TOTAL_BEATS),
       answers,
     };
   } catch {
@@ -74,17 +74,17 @@ export function QuizProvider({ children }: { children: ReactNode }) {
     }
   }, [state, hydrated]);
 
-  const answer = useCallback((questionId: number, answerId: string) => {
+  const answer = useCallback((beatId: string, answerId: string) => {
     setState((prev) => ({
       ...prev,
-      answers: { ...prev.answers, [questionId]: answerId },
+      answers: { ...prev.answers, [beatId]: answerId },
     }));
   }, []);
 
   const next = useCallback(() => {
     setState((prev) => ({
       ...prev,
-      currentIndex: Math.min(prev.currentIndex + 1, TOTAL_QUESTIONS),
+      currentIndex: Math.min(prev.currentIndex + 1, TOTAL_BEATS),
     }));
   }, []);
 

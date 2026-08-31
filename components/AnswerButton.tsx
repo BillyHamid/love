@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import type { Answer } from "@/data/questions";
+import type { Answer } from "@/data/story";
 import { personalize } from "@/lib/quiz";
 
 interface AnswerButtonProps {

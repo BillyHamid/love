@@ -8,7 +8,7 @@ import {
   evasiveTaunts,
   type Answer,
   type Question,
-} from "@/data/questions";
+} from "@/data/story";
 import { personalize } from "@/lib/quiz";
 
 interface YesNoAnswersProps {
