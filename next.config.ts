@@ -1,14 +1,13 @@
 import type { NextConfig } from "next";
 
-const nextConfig: NextConfig = {
-  /**
-   * Export statique : l'application est 100 % côté client (aucun backend,
-   * aucune base de données). Le dossier `out/` généré se déploie tel quel
-   * sur Netlify, Vercel, GitHub Pages ou n'importe quel hébergeur statique.
-   */
-  output: "export",
-  images: { unoptimized: true },
-  trailingSlash: true,
-};
+/**
+ * Configuration volontairement minimale.
+ *
+ * L'application est entièrement côté client (aucun backend, aucune base de
+ * données) : `next build` pré-rend donc déjà chaque page en HTML statique.
+ * Inutile de forcer `output: "export"` — cela sortait du chemin par défaut
+ * de Vercel sans rien apporter ici.
+ */
+const nextConfig: NextConfig = {};
 
 export default nextConfig;

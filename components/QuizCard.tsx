@@ -34,7 +34,7 @@ export default function QuizCard() {
 
   // Le récit est terminé (ou l’URL a été ouverte trop loin) : direction résultat.
   useEffect(() => {
-    if (hydrated && currentIndex >= TOTAL_BEATS) router.replace("/result/");
+    if (hydrated && currentIndex >= TOTAL_BEATS) router.replace("/result");
   }, [hydrated, currentIndex, router]);
 
   // Un minuteur en cours ne doit jamais survivre au démontage.
@@ -80,7 +80,7 @@ export default function QuizCard() {
         setReaction(null);
         next();
         if (isLastBeat) {
-          router.push("/result/");
+          router.push("/result");
         } else {
           setIsLocked(false);
         }

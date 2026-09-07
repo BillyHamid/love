@@ -1,6 +1,12 @@
+# Netlify sert Next.js via son plugin officiel, installé automatiquement.
+# (Le déploiement principal se fait sur Vercel ; ce fichier n'est là que
+#  pour garder l'option ouverte.)
 [build]
   command = "npm run build"
-  publish = "out"
+  publish = ".next"
 
 [build.environment]
   NODE_VERSION = "22"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"

@@ -23,7 +23,7 @@ export default function WelcomeScreen() {
   // Une nouvelle partie repart toujours de zéro.
   const start = () => {
     reset();
-    router.push("/quiz/");
+    router.push("/quiz");
   };
 
   return (
