@@ -20,9 +20,16 @@ un export statique : un dossier `out/` qu'on dépose où on veut.
 ```ts
 girlfriendName: "Audrey",     // son prénom
 boyfriendName:  "Billy",      // le tien
+boyfriendPhone: "",           // ton numéro WhatsApp, pour recevoir ses réponses
 finalMessage:   "…",          // ton mot personnel, révélé mot après mot
-shareMessage:   "…",          // le texte pré-rempli du partage WhatsApp
 ```
+
+**Renseigne `boyfriendPhone`** au format international, sans « + » ni
+espaces (`"22670123456"`). C'est le seul moyen de savoir ce qu'elle a
+répondu : l'application n'a aucun backend, ses réponses restent sur son
+téléphone, et l'écran final lui propose de te les envoyer par WhatsApp en
+un tap. Laissé vide, WhatsApp s'ouvre quand même et elle te choisit dans
+ses contacts — ça marche, c'est juste un tap de plus.
 
 **Le récit : [`data/story.ts`](data/story.ts).**
 Tout y est centralisé — scènes, questions, réactions, piques. L'ordre du
@@ -98,21 +105,32 @@ npm run typecheck
 npm run build
 ```
 
-`npm run build` produit un site statique complet dans `out/`.
-Pour le prévisualiser exactement comme en production :
+Pour prévisualiser exactement la version de production :
 
 ```bash
-npx serve out
+npm run build && npm start
 ```
 
 ---
 
 ## 3. Le déploiement
 
+### Vercel (recommandé)
+
+```bash
+npm i -g vercel
+vercel          # aperçu
+vercel --prod   # production
+```
+
+Aucune configuration : Vercel détecte Next.js et s'occupe du reste. Par
+l'interface web, il suffit d'importer le dépôt sur
+[vercel.com/new](https://vercel.com/new).
+
 ### Netlify
 
-Le fichier [`netlify.toml`](netlify.toml) est déjà configuré
-(`command = "npm run build"`, `publish = "out"`).
+Le fichier [`netlify.toml`](netlify.toml) est configuré pour le plugin
+Next.js officiel, que Netlify installe tout seul.
 
 ```bash
 npm i -g netlify-cli
@@ -123,20 +141,6 @@ netlify deploy --build --prod
 Par l'interface web : connecte le dépôt sur
 [app.netlify.com](https://app.netlify.com/start), Netlify lit `netlify.toml`
 et il n'y a rien d'autre à régler.
-
-Sans dépôt Git, le plus rapide reste `npm run build` puis un glisser-déposer
-du dossier `out/` sur [app.netlify.com/drop](https://app.netlify.com/drop).
-
-### Vercel
-
-```bash
-npm i -g vercel
-vercel          # aperçu
-vercel --prod   # production
-```
-
-Vercel détecte Next.js et l'export statique automatiquement, sans
-configuration.
 
 ---
 
@@ -162,6 +166,7 @@ components/
 ├── EvasiveButton.tsx   le bouton qui se dérobe (souris, doigt, stylet)
 ├── ResultScreen.tsx    le verdict, révélé au fil du scroll
 ├── Confetti.tsx        la salve de l'écran final
+├── AnswersRecap.tsx    ses réponses, et le bouton pour te les envoyer
 ├── MusicPlayer.tsx     le bouton 🎵 (jamais de lecture automatique)
 ├── TypewriterText.tsx  le message final, mot après mot
 ├── CouplePhoto.tsx     la photo, si elle existe
@@ -181,8 +186,13 @@ lib/quiz-store.tsx      l'état de la partie, partagé entre les trois écrans
   navigateur intégré de WhatsApp, qui recharge volontiers les pages. Il est
   relu après le montage, jamais pendant le rendu, pour éviter tout écart
   d'hydratation. Rien ne quitte le téléphone.
-- **Export statique** (`output: "export"`) : aucun serveur à faire tourner,
-  donc rien à payer et rien qui tombe en panne.
+- **Aucune configuration de build.** L'application étant entièrement côté
+  client, `next build` pré-rend déjà chaque page en HTML statique : forcer
+  `output: "export"` faisait sortir Vercel de son chemin par défaut sans
+  rien apporter, et le déploiement répondait 404.
+- **Rien n'est collecté.** Ses réponses vivent dans son navigateur et n'en
+  sortent que si elle appuie elle-même sur « Envoyer », après avoir pu les
+  relire. Il n'y a ni serveur, ni base, ni traceur.
 - **Photo et musique se retirent d'elles-mêmes** si le fichier manque. La page
   étant pré-rendue, l'erreur de chargement peut précéder l'hydratation : les
   deux composants vérifient donc aussi l'état réel de l'élément au montage,

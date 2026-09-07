@@ -8,6 +8,7 @@ import FloatingHearts from "@/components/FloatingHearts";
 import TypewriterText from "@/components/TypewriterText";
 import CouplePhoto from "@/components/CouplePhoto";
 import Confetti from "@/components/Confetti";
+import AnswersRecap from "@/components/AnswersRecap";
 import { useQuiz } from "@/lib/quiz-store";
 import { personalize } from "@/lib/quiz";
 import { quizConfig } from "@/lib/config";
@@ -46,7 +47,7 @@ const inView = {
 
 export default function ResultScreen() {
   const router = useRouter();
-  const { hydrated, answeredCount, reset } = useQuiz();
+  const { hydrated, answeredCount, answers, reset } = useQuiz();
 
   // Arriver ici sans avoir joué n'a aucun sens : retour à l'accueil.
   useEffect(() => {
@@ -161,6 +162,13 @@ export default function ResultScreen() {
 
         {/* Photo optionnelle : rien ne casse si `public/couple.jpg` est absent */}
         <CouplePhoto src={quizConfig.photoSrc} />
+
+        {/* Ses réponses, qu’elle seule peut décider de lui envoyer */}
+        <motion.section {...inView} className="card-surface px-6 py-7">
+          <motion.div variants={line}>
+            <AnswersRecap answers={answers} />
+          </motion.div>
+        </motion.section>
 
         {/* Rejouer */}
         <motion.section {...inView} className="card-surface px-6 py-6">
